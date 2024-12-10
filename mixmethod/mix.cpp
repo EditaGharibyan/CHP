@@ -1,86 +1,33 @@
 #include <iostream>
 #include <string>
-#include <cctype>
 
-using namespace std;
-
-string caesarEncrypt(const string& plaintext, int key) {
-    string encrypted = "";
-    for (char ch : plaintext) {
-        if (isupper(ch)) {
-            encrypted += char(int(ch + key - 65) % 26 + 65);
-        } else if (islower(ch)) {
-            encrypted += char(int(ch + key - 97) % 26 + 97);
-        } else {
-            encrypted += ch;
-        }
-    }
-    return encrypted;
-}
-
-string caesarDecrypt(const string& ciphertext, int key) {
-    string decrypted = "";
-    for (char ch : ciphertext) {
-        if (isupper(ch)) {
-            decrypted += char(int(ch - key - 65 + 26) % 26 + 65);
-        } else if (islower(ch)) {
-            decrypted += char(int(ch - key - 97 + 26) % 26 + 97);
-        } else {
-            decrypted += ch;
-        }
-    }
-    return decrypted;
-}
-
-string vigenereEncrypt(const string& plaintext, const string& key) {
-    string encrypted = "";
-    int keyIndex = 0;
-    for (char ch : plaintext) {
-        if (isalpha(ch)) {
-            char base = isupper(ch) ? 'A' : 'a';
-            encrypted += char(((ch - base + (key[keyIndex % key.length()] - base)) % 26) + base);
-            keyIndex++;
-        } else {
-            encrypted += ch;
-        }
-    }
-    return encrypted;
-}
-
-string vigenereDecrypt(const string& ciphertext, const string& key) {
-    string decrypted = "";
-    int keyIndex = 0;
-    for (char ch : ciphertext) {
-        if (isalpha(ch)) {
-            char base = isupper(ch) ? 'A' : 'a';
-            decrypted += char(((ch - base - (key[keyIndex % key.length()] - base) + 26) % 26) + base);
-            keyIndex++;
-        } else {
-            decrypted += ch;
-        }
-    }
-    return decrypted;
-}
+#include "caesar.cpp"  
+#include "Mat.cpp"  
 
 int main() {
-    string inputText;
-    int caesarKey = 3;
-    string vigenereKey = "KEY";
-    
-    cout << "Enter the text to encrypt: ";
-    getline(cin, inputText);
+    int shift;
+    std::string plaintext;
 
-    string caesarEncrypted = caesarEncrypt(inputText, caesarKey);
-    cout << "\nCaesar Cipher Encrypted: " << caesarEncrypted << endl;
-    
-    string vigenereEncrypted = vigenereEncrypt(caesarEncrypted, vigenereKey);
-    cout << "Vigenère Cipher Encrypted: " << vigenereEncrypted << endl;
+    std::cout << "Enter shift for Caesar Cipher: ";
+    std::cin >> shift;
+    std::cin.ignore();  
 
-    string vigenereDecrypted = vigenereDecrypt(vigenereEncrypted, vigenereKey);
-    cout << "\nVigenère Cipher Decrypted: " << vigenereDecrypted << endl;
-    
-    string caesarDecrypted = caesarDecrypt(vigenereDecrypted, caesarKey);
-    cout << "Caesar Cipher Decrypted: " << caesarDecrypted << endl;
+    std::cout << "Enter plaintext to encrypt with both Caesar and Matrix methods: ";
+    std::getline(std::cin, plaintext);
+
+    CaesarCipher caesarCipher(shift);
+    std::string caesarEncrypted = caesarCipher.encrypt(plaintext);
+    std::cout << "Caesar Encrypted Text: " << caesarEncrypted << std::endl;
+
+    FixedMatrixEncryptor matrixEncryptor(caesarEncrypted);
+    std::string finalEncrypted = matrixEncryptor.encrypt();
+    std::cout << "Final Encrypted Text (Caesar + Matrix): " << finalEncrypted << std::endl;
+
+    std::string matrixDecrypted = matrixEncryptor.decrypt(finalEncrypted);
+    std::cout << "After Matrix Decryption (Caesar Encrypted Text): " << matrixDecrypted << std::endl;
+
+    std::string originalText = caesarCipher.decrypt(matrixDecrypted);
+    std::cout << "Original Text after Full Decryption: " << originalText << std::endl;
 
     return 0;
 }
